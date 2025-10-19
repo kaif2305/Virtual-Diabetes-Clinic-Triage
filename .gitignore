@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.log
+
+# Virtual environments
+.venv/
+env/
+venv/
+*.env
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Docker
+*.dockerignore
+*.env
+
+# IDEs
+.vscode/
+.idea/
+
+# Models folder (optional: only track versioned models)
+models/* 
+!models/v0.1/
+!models/v0.2/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# GitHub Actions artifacts (CI uploads)
+artifacts/

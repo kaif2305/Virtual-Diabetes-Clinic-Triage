@@ -1,0 +1,7 @@
+{
+  "model_version": "v0.1",
+  "model_type": "LinearRegression",
+  "random_seed": 42,
+  "model_kind": "linear",
+  "rmse": 53.85344583676594
+}
