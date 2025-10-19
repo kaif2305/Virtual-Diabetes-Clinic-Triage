@@ -7,4 +7,5 @@ pytest==7.4.2
 flake8==6.1.0
 requests==2.31.0
 httpx
+pandas
 pytest

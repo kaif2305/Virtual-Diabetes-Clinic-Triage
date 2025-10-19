@@ -4,8 +4,10 @@ from pydantic import BaseModel
 from .model_utils import FEATURE_ORDER, load_model
 import os
 
-MODEL_VERSION = os.environ.get("MODEL_VERSION", "v0.1")
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", MODEL_VERSION, "model.joblib")
+MODEL_PATH = os.environ.get("MODEL_PATH")  # prefer env
+if MODEL_PATH is None:
+    MODEL_VERSION = os.environ.get("MODEL_VERSION", "v0.1")
+    MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", MODEL_VERSION, "model.joblib")
 MODEL_PATH = os.path.normpath(MODEL_PATH)
 
 app = FastAPI(title="Virtual Diabetes Clinic Triage")
