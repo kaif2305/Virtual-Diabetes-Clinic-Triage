@@ -1,0 +1,6 @@
+{
+  "rmse": 53.77745406534389,
+  "threshold_top10_percent": 269.6,
+  "precision_at_top10": 0.0,
+  "recall_at_top10": 0.0
+}

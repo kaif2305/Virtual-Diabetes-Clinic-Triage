@@ -1,1 +1,84 @@
 
+name: Release
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Train model for release
+        run: |
+          TAG=${GITHUB_REF##*/}
+          python src/train.py --model ridge --seed 42 --version ${TAG} --out-dir models
+          # copy to models/model.joblib for Docker context
+          cp models/${TAG}/model.joblib models/model.joblib
+          cp models/${TAG}/model_metadata.json models/model_metadata.json
+          cp models/${TAG}/metrics.json models/metrics.json
+
+      - name: Build Docker image
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+        run: |
+          docker build -t $IMAGE .
+          echo "Built $IMAGE"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image to GHCR
+        run: |
+          docker push ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+
+      - name: Smoke test container
+        run: |
+          IMAGE=ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+          docker run -d --name vdt_test -p 8081:8080 $IMAGE
+          for i in $(seq 1 20); do
+            sleep 1
+            if curl -s http://localhost:8081/health | grep -q ok; then
+              echo "healthy"
+              break
+            fi
+          done
+          curl -s -X POST http://localhost:8081/predict -H "Content-Type: application/json" -d @ci/sample_payload.json | jq .
+          docker stop vdt_test
+          docker rm vdt_test
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload metrics to release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url || '' }}
+          asset_path: models/metrics.json
+          asset_name: metrics-${{ github.ref_name }}.json
+          asset_content_type: application/json

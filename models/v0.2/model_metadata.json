@@ -1,0 +1,7 @@
+{
+  "model_version": "v0.2",
+  "model_type": "Ridge",
+  "random_seed": 42,
+  "model_kind": "ridge",
+  "rmse": 53.77745406534389
+}

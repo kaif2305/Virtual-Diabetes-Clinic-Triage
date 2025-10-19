@@ -16,5 +16,5 @@ COPY models models
 COPY ci/sample_payload.json ci/sample_payload.json
 
 EXPOSE 8080
-ENV MODEL_PATH=/app/models/model.joblib
+ENV MODEL_PATH=/app/models/${MODEL_VERSION}/model.joblib
 CMD ["uvicorn", "app.app:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"]
